@@ -18,10 +18,11 @@ public interface IACCGet {
 	
 	public double getDistanceOfClosestCarRadar();
 	
+	
+	public double getCurve();
 	public double getSpeed();
 	
 	public double getRelativeSpeed();
-	public double getAcceleration();
 	
 	public double getTargetSpeed();
 	public boolean isAccIntact();

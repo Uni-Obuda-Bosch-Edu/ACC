@@ -6,8 +6,7 @@ public interface IACCSet {
 	public void SetGear(int gear);
 	*/
 	
-	
-	public void SetAlarm();
+	public void SetAlarm(boolean state);
 	
 	public void pushGasPedal(double percent);
 	public void releaseGasPedal(double percent);

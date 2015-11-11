@@ -16,14 +16,21 @@ public class Acc {
 	
 	public Acc(double maximumAcceleration,
 			IACCSet accSet,
-			IACCGet accGet,
-			double targetSpeed
+			IACCGet accGet
 			) {
 		this.maximumAcceleration = maximumAcceleration;
 		this.accGet = accGet;
 		this.accSet = accSet;
-		this.targetSpeed = targetSpeed;
-		this.tempomatSpeed = targetSpeed;
+		this.targetSpeed = accGet.getTargetSpeed();
+		this.tempomatSpeed = accGet.getTargetSpeed();
+		if(accGet.getDistanceOfClosestCarRadar() == -1)
+		{
+			this.isCarAhead = false;
+		}
+		else
+		{
+			this.isCarAhead = true;
+		}
 	}
 	
 	
@@ -54,15 +61,24 @@ public class Acc {
 		this.relativeAcceleration = deltaSpeed / deltatime; 
 	}
 	
-	private void Iterate(double timeLeft)
+	public void Iterate(double timeLeft)
 	{
+		if(accGet.getDistanceOfClosestCarRadar() == -1)
+		{
+			this.isCarAhead = false;
+		}
+		else
+		{
+			this.isCarAhead = true;
+		}
+		
 		lastRelativeSpeed = currentRelativeSpeed;
 		lastSpeed = currentSpeed;
 		
 		this.currentBrakePedalPosition =
 		accGet.getBrakePedalPositionPercent();
 		
-		this.currentBrakePedalPosition =
+		this.currentGasPedalPosition =
 	    accGet.getGasPedalPositionPercent();
 		
 		this.currentDistanceOfClosestCar =
@@ -72,7 +88,7 @@ public class Acc {
 		accGet.getRelativeSpeed();
 		
 		this.currentAcceleration =
-		accGet.getAcceleration();
+		(currentSpeed - lastSpeed) / timeLeft;
 		
 		this.currentSpeed =
 	    accGet.getSpeed();
@@ -161,24 +177,27 @@ public class Acc {
 	
 	private void doControl()
 	{
-		if(curve > 0)
+		if(accGet.isAccIntact())
 		{
-			double rateofslow = curve / 90;
+			if(curve > 0)
+			{
+				double rateofslow = curve / 90;
+				
+				targetSpeed = curvespeed / rateofslow;
+			}
+			else
+			{
+				targetSpeed = tempomatSpeed;
+			}
 			
-			targetSpeed = curvespeed / rateofslow;
-		}
-		else
-		{
-			targetSpeed = tempomatSpeed;
-		}
-		
-		if(!isCarAhead)
-		{
-			Tempomat();
-		}
-		else
-		{
-			Acc();
+			if(!isCarAhead)
+			{
+				Tempomat();
+			}
+			else
+			{
+				Acc();
+			}
 		}
 	}
 	
@@ -241,7 +260,7 @@ public class Acc {
 				//we are fucked
 				//set alarm és satufék
 				
-				accSet.SetAlarm();
+				accSet.SetAlarm(true);
 				accSet.releaseGasPedal(100);
 				accSet.pushBrakePedal(100);
 			}
